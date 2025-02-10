@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plants</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .edit-row {
+            background-color: #ffffcc;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html"><img src="043.webp" alt="Home" class="home-icon"></a></li>
+            <li><a href="Knowledge.html">Knowledge</a></li>
+            <li><a href="Question.html">Question</a></li>
+            <li><a href="Plant.html">Plant</a></li>
+        </ul>
+    </nav>
+
+    <h1>Plants</h1>
+
+    <button id="add-row-btn">Add New Row</button>
+
+    <table id="plant-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Plant Name</th>
+                <th>Description</th>
+                <th>Species</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be inserted here by JavaScript -->
+        </tbody>
+    </table>
+
+    <script>
+        const table = document.getElementById('plant-table');
+        const tbody = table.querySelector('tbody');
+        const addRowBtn = document.getElementById('add-row-btn');
+
+        let data = [];  // Store the fetched data
+        let editingRow = null; // Track the row being edited
+
+        // Function to fetch data from the backend
+        async function fetchData() {
+            try {
+                const response = await fetch('/api/plants'); // Replace with your actual endpoint
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                data = await response.json();
+                renderTable();
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                tbody.innerHTML = `<tr><td colspan="5">Error loading data.</td></tr>`;
+            }
+        }
+
+        // Function to render the table
+        function renderTable() {
+            tbody.innerHTML = ''; // Clear existing rows
+
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.dataset.id = item.id; // Store the ID for easy access
+
+                row.innerHTML = `
+                    <td>${item.id}</td>
+                    <td>${item.plant_name}</td>
+                    <td>${item.description}</td>
+                    <td>${item.species}</td>
+                    <td>
+                        <button class="edit-btn">Edit</button>
+                        <button class="delete-btn">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Function to handle edit click
+        function handleEdit(row) {
+            if (editingRow) {
+                // If already editing a row, revert it
+                revertRow(editingRow);
+            }
+
+            editingRow = row;
+            row.classList.add('edit-row');
+
+            // Get the current data
+            const id = row.dataset.id;
+            const plant_name = row.cells[1].textContent;
+            const description = row.cells[2].textContent;
+            const species = row.cells[3].textContent;
+
+            // Replace table cells with input fields
+            row.cells[1].innerHTML = `<input type="text" value="${plant_name}">`;
+            row.cells[2].innerHTML = `<input type="text" value="${description}">`;
+            row.cells[3].innerHTML = `<input type="text" value="${species}">`;
+
+            // Change buttons
+            row.cells[4].innerHTML = `
+                <button class="save-btn">Save</button>
+                <button class="cancel-btn">Cancel</button>
+            `;
+        }
+
+        //Function to revert the row
+        function revertRow(row) {
+            row.classList.remove('edit-row');
+
+            // Get the current data
+            const id = row.dataset.id;
+            const item = data.find(item => item.id == id);
+
+            // Restore original cell content
+            row.cells[1].textContent = item.plant_name;
+            row.cells[2].textContent = item.description;
+            row.cells[3].textContent = item.species;
+
+            // Restore the action buttons
+            row.cells[4].innerHTML = `
+                <button class="edit-btn">Edit</button>
+                <button class="delete-btn">Delete</button>
+            `;
+            editingRow = null;
+        }
+
+        // Function to handle save click
+        async function handleSave(row) {
+            const id = row.dataset.id;
+            const plant_name = row.cells[1].querySelector('input').value;
+            const description = row.cells[2].querySelector('input').value;
+            const species = row.cells[3].querySelector('input').value;
+
+            try {
+                // Send a PUT request to update the data
+                const response = await fetch(`/api/plants/${id}`, {  // Replace with your API endpoint
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id:id, plant_name: plant_name, description: description, species: species })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                // Update the data array and re-render the table
+                const index = data.findIndex(item => item.id == id);
+                if (index !== -1) {
+                    data[index] = {id: id, plant_name: plant_name, description: description, species: species};
+                }
+                renderTable();
+                editingRow = null;
+            } catch (error) {
+                console.error('Error updating data:', error);
+                alert('Error saving data.');
+            }
+        }
+
+        // Function to handle delete click
+        async function handleDelete(row) {
+            const id = row.dataset.id;
+
+            if (confirm('Are you sure you want to delete this row?')) {
+                try {
+                    // Send a DELETE request to remove the data
+                    const response = await fetch(`/api/plants/${id}`, {  // Replace with your API endpoint
+                        method: 'DELETE'
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    // Remove the row from the data array and re-render the table
+                    data = data.filter(item => item.id != id);
+                    renderTable();
+                } catch (error) {
+                    console.error('Error deleting data:', error);
+                    alert('Error deleting data.');
+                }
+            }
+        }
+
+        // Function to handle add row click
+        async function handleAddRow() {
+            try {
+                // Send a POST request to create a new row
+                const response = await fetch('/api/plants', {  // Replace with your API endpoint
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ plant_name: 'New Plant', description: 'New Description', species: 'New Species' }) // Initial values
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const newItem = await response.json();  // Assuming the backend returns the new item with an ID
+                data.push(newItem);
+                renderTable();
+            } catch (error) {
+                console.error('Error adding data:', error);
+                alert('Error adding data.');
+            }
+        }
+
+        // Event listeners
+        tbody.addEventListener('click', (event) => {
+            const row = event.target.closest('tr');
+            if (event.target.classList.contains('edit-btn')) {
+                handleEdit(row);
+            } else if (event.target.classList.contains('save-btn')) {
+                handleSave(row);
+            }
+            else if (event.target.classList.contains('cancel-btn')) {
+                revertRow(row);
+            }
+            else if (event.target.classList.contains('delete-btn')) {
+                handleDelete(row);
+            }
+        });
+
+        addRowBtn.addEventListener('click', handleAddRow);
+
+        // Initial data load
+        fetchData();
+    </script>
+</body>
+</html>

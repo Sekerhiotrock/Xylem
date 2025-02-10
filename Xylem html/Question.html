@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questions</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+         /* Apply new font */
+        body {
+          font-family: 'Bold', sans-serif;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+            border-radius: 8px; /* Rounded corners */
+            overflow: hidden; /* Hide border radius overflow */
+            background-color: transparent;  /* Transparent background */
+            color: #fff;  /* White text for readability */
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px 15px;
+            text-align: left;
+            transition: background-color 0.2s ease;
+            color: #fff;  /* White text */
+            font-family: 'Bold', sans-serif;
+        }
+        th {
+            background-color: rgba(255, 255, 255, 0.1); /* Translucent white header */
+            font-weight: 600;
+            color: #fff;  /* White text */
+            font-family: 'Bold', sans-serif;
+        }
+
+        /* Hover effect for rows */
+        tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.2); /* Translucent white on hover */
+        }
+
+        /* Style the edit row */
+        .edit-row {
+            background-color: #eaf2ff;  /* Light blue for edit rows */
+        }
+
+        /* Button styles */
+        button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            font-family: 'Bold', sans-serif;
+        }
+
+        .edit-btn {
+            background-color: #4CAF50; /* Green */
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: #f44336; /* Red */
+            color: white;
+        }
+
+        .save-btn {
+            background-color: #2196F3; /* Blue */
+            color: white;
+        }
+
+        .cancel-btn {
+            background-color: #9e9e9e; /* Grey */
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.8; /* Darken on hover */
+        }
+
+        /* Input Styles */
+        input[type="text"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+            width: 100%;
+            box-sizing: border-box;
+            color:black /*Added to make font black in the prompt input*/
+        }
+          select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* General heading and paragraph styles (can be overridden in style.css) */
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #fff;
+            font-family: 'Bold', sans-serif;
+        }
+        body {
+            font-size: 1rem;
+            line-height: 1.6;
+            color:#fff;
+        }
+        .edit-btn {
+            background-color: #4CAF50; /* Green */
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: #f44336; /* Red */
+            color: white;
+        }
+
+        .save-btn {
+            background-color: #2196F3; /* Blue */
+            color: white;
+        }
+
+        .cancel-btn {
+            background-color: #9e9e9e; /* Grey */
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html"><img src="043.webp" alt="Home" class="home-icon"></a></li>
+            <li><a href="Knowledge.html">Knowledge</a></li>
+            <li><a href="Question.html">Question</a></li>
+            <li><a href="Plant.html">Plant</a></li>
+        </ul>
+    </nav>
+
+    <h1>Knowledge</h1>
+
+    <button id="add-row-btn">Add New Row</button>
+
+    <table id="knowledge-table">
+        <thead>
+            <tr>
+                <th>QA ID</th>
+                <th>Question</th>
+                <th>Answer</th>
+                <th>Related Plant</th>
+                <th>Source</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be inserted here by JavaScript -->
+        </tbody>
+    </table>
+
+    <script>
+        const table = document.getElementById('knowledge-table');
+        const tbody = table.querySelector('tbody');
+        const addRowBtn = document.getElementById('add-row-btn');
+
+        let data = [];
+        let editingRow = null;
+        const plantOptions = ['Rose', 'Tomato', 'Orchid', 'Sunflower', 'Other'];  //Example array of plants
+        const FILE_UPLOAD_API = "/api/upload_pdf"; // API to upload PDF file
+
+        async function fetchData() {
+            try {
+                const response = await fetch('knowledge_data.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                data = await response.json();
+                renderTable();
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                tbody.innerHTML = `<tr><td colspan="6">Error loading data.</td></tr>`;
+            }
+        }
+
+        function renderTable() {
+            tbody.innerHTML = '';
+
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.dataset.qa_id = item.qa_id;
+
+                row.innerHTML = `
+                    <td>${item.qa_id}</td>
+                    <td>${item.question}</td>
+                    <td>${item.answer}</td>
+                    <td>${item.related_plant}</td>
+                    <td>${item.source}</td>
+                    <td>
+                        <button class="edit-btn">Edit</button>
+                        <button class="delete-btn">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function handleEdit(row) {
+            if (editingRow) {
+                revertRow(editingRow);
+            }
+
+            editingRow = row;
+            row.classList.add('edit-row');
+
+            const qa_id = row.dataset.qa_id;
+            const question = row.cells[1].textContent;
+            const answer = row.cells[2].textContent;
+            const relatedPlant = row.cells[3].textContent;
+            const source = row.cells[4].textContent;
+
+            // Create select element for related plant
+            const select = document.createElement('select');
+            plantOptions.forEach(plant => {
+                const option = document.createElement('option');
+                option.value = plant;
+                option.textContent = plant;
+                if (plant === relatedPlant) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+            row.cells[3].innerHTML = '';
+            row.cells[3].appendChild(select);
+
+            // Create file input element for source PDF upload
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = '.pdf'; // Accept only PDF files
+            fileInput.addEventListener('change', handleFileChange);
+            row.cells[4].innerHTML = '';
+            row.cells[4].appendChild(fileInput);
+
+
+            row.cells[5].innerHTML = `
+                <button class="save-btn">Save</button>
+                <button class="cancel-btn">Cancel</button>
+            `;
+        }
+
+          // Function to handle PDF file change
+        function handleFileChange(event) {
+            const file = event.target.files[0];
+            if (file) {
+                // You can display the file name or size here
+                console.log('Selected PDF:', file.name, file.size);
+                // You can also initiate the upload process here, but I'm leaving that for a separate function
+            }
+        }
+
+
+        function revertRow(row) {
+            row.classList.remove('edit-row');
+
+            const qa_id = row.dataset.qa_id;
+            const item = data.find(item => item.qa_id === qa_id);
+
+            row.cells[1].textContent = item.question;
+            row.cells[2].textContent = item.answer;
+            row.cells[3].textContent = item.related_plant;
+            row.cells[4].textContent = item.source;
+
+            row.cells[5].innerHTML = `
+                <button class="edit-btn">Edit</button>
+                <button class="delete-btn">Delete</button>
+            `;
+            editingRow = null;
+        }
+
+        async function handleSave(row) {
+            const qa_id = row.dataset.qa_id;
+            const question = row.cells[1].querySelector('input').value;
+            const answer = row.cells[2].querySelector('input').value;
+            const relatedPlant = row.cells[3].querySelector('select').value;
+            const fileInput = row.cells[4].querySelector('input[type="file"]');
+            let source = row.cells[4].textContent; // Initial value
+
+
+            //Handle upload file
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                //Upload file
+                try {
+                     const formData = new FormData();
+                     formData.append('pdf', file);
+
+                     const response = await fetch(FILE_UPLOAD_API, {
+                         method: 'POST',
+                         body: formData,
+                     });
+
+                     if (response.ok) {
+                           const result = await response.json();
+                           source = result.filename; //Use new file
+                      } else {
+                         throw new Error(`File upload failed: ${response.status}`);
+                      }
+                 } catch (error) {
+                     console.error('Error uploading file:', error);
+                     alert('Error uploading file.');
+                 }
+            }
+
+            // Find the item in the data array and update it
+            const index = data.findIndex(item => item.qa_id === qa_id);
+            if (index !== -1) {
+                 data[index] = { ...data[index], question: question, answer: answer, related_plant: relatedPlant, source: source };
+            }
+
+            renderTable();
+            editingRow = null;
+          // Implement backend upload
+        }
+
+        async function handleDelete(row) {
+            const qa_id = row.dataset.qa_id;
+
+            if (confirm('Are you sure you want to delete this row?')) {
+                data = data.filter(item => item.qa_id !== qa_id);
+                renderTable();
+            }
+        }
+
+        async function handleAddRow() {
+            const newQaId = generateUniqueQaId();
+            const newRow = { qa_id: newQaId, question: 'New Question', answer: 'New Answer', related_plant: plantOptions[0], source: '' }; // set "Unknown" in a source
+
+            data.push(newRow);
+            renderTable();
+
+        }
+
+        function generateUniqueQaId() {
+            const maxQaId = data.reduce((max, item) => {
+                const qaId = parseInt(item.qa_id);
+                return qaId > max ? qaId : max;
+            }, 0);
+            const newQaId = (maxQaId + 1).toString();
+            return newQaId;
+        }
+
+        tbody.addEventListener('click', (event) => {
+            const row = event.target.closest('tr');
+            if (event.target.classList.contains('edit-btn')) {
+                handleEdit(row);
+            } else if (event.target.classList.contains('save-btn')) {
+                handleSave(row);
+            } else if (event.target.classList.contains('cancel-btn')) {
+                revertRow(row);
+            } else if (event.target.classList.contains('delete-btn')) {
+                handleDelete(row);
+            }
+        });
+
+        addRowBtn.addEventListener('click', handleAddRow);
+        fetchData();
+    </script>
+</body>
+</html>
