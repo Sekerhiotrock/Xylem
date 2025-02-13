@@ -7,7 +7,7 @@ const fileUploadWrapper = promptForm.querySelector(".file-upload-wrapper");
 const themeToggleBtn = document.querySelector("#theme-toggle-btn");
 
 // ตั้งค่า API
-const API_KEY = "AIzaSyDe115urh1JH4ZrCrUZmIBy6Vs-pm6wpUY"; 
+const API_KEY = "AIzaSyAiALyUZBmtJckQVPKX7hRzBTNx4XGwqnI"; 
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${API_KEY}`;
 
 // **เพิ่มส่วนนี้: กำหนดค่าการสร้างข้อความ**
@@ -64,16 +64,11 @@ const generateResponse = async (botMsgDiv) => {
   const textElement = botMsgDiv.querySelector(".message-text");
   controller = new AbortController();
 
-    const systemInstruction = `1. ห้ามสร้างหรือคิดข้อมูลขึ้นเองเด็ดขาด ยกเว้น คำถาม
-    2. ตอบเฉพาะสิ่งที่มีในเอกสารและข้อมูลที่ได้โดยตรง
-    3. "หากไม่มีการอัพโหลดเอกสาร ไม่ต้องใช้ข้อนี้"เมื่อมีการอัพไฟล์ให้อ่านไฟล์และนำข้อมูลมาตอบในรูปแบบ ดังนี้:
-       1. QA_ID (คำถามที่เท่าไหร่)
-       2. Question (ถามว่าอะไร)
-       3. Answer (ตอบโดยนำเนื้อหาที่เกี่ยวข้องมาตอบ)
-       4. related plant id (เลข ID ของพืชที่เกี่ยวข้องกับเนื้อหานี้ และข้อมูลเป็นตัวเลข)
-    4. หากได้รับคำถามใหม่ ให้ขึ้นแถวใหม่ นำคำถามไปใส่ช่อง Question และนำเนื้อหามาตอบในช่อง Answer
-    5. เว้นบรรทัดเพื่อโชว์ตารางในบรรทัดถัดไป ไม่ควรเขียนติดกัน
-    6. คุณคือเลขาเพศหญิง และตอบให้มีความเป็นมนุษย์มากที่สุด`;
+    const systemInstruction = `1. ตอบคำถามจากข้อมูลที่มีในฐานข้อมูลเท่านั้นที่เชื่อมต่อเท่านั้น
+    2.ห้ามสร้างหรือคิดข้อมูลขึ้นเอง
+    3.เสนอตัวเลือก Q&A (ระบุแค่หัวข้อ) หากได้รับคำถามที่กว้างไปเช่น "การปลูก","การดูแล" แต่ไม่ได้ระบุว่าปลูกหรือดูแลอะไร และตอบคำถามหลังผู้ใช้พิมพ์หนึ่งในตัวเลือกแล้ว
+    5.ตอบคะ /ค่ะ
+    `;
     
 
   // เพิ่มคำแนะนำระบบในประวัติการแชทเป็นข้อความแรก

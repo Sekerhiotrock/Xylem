@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Xylem Chat</title>
+  <link rel="stylesheet" href="Home.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@32,400,0,0" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="nav.js"></script>
+
+  <header>
+    <h1>Xylem Chat </h1>
+    <p>แพลตฟอร์มให้ความรู้เรื่องพืชด้วย AI </p>
+  </header>
+
+  <section id="hero">
+    <div class="hero-text">
+      <h2>รับคำแนะนำการดูแลพืชดอก</h2>
+      <p>ใช้แชทบอท AI ของเราเพื่อรับคำตอบสำหรับคำถามเกี่ยวกับการดูแลพืช และค้นหาพืชที่เหมาะสมกับสภาพแวดล้อมของคุณ</p>
+      <a href="Chat.html" class="cta-button">คุยกับแชทบอท</a>
+    </div>
+  </section>
+
+ <section id="plant-info">
+  <h2>ฐานข้อมูลข้อมูลพืช</h2>
+  <p>พืชดอกที่พบในฐานข้อมูลของเรา</p>
+
+  <div class="plant-search">
+    <input type="text" id="plantSearchInput" placeholder="ค้นหาพืช...">
+    <button onclick="searchPlants()">ค้นหา</button>
+  </div>
+
+  <div class="plant-grid">
+    <div class="plant-card">
+      <img src="roze.jfif" alt="Rose">
+      <h3>Rose</h3>
+      <p>กุหลาบเป็นดอกไม้ที่สวยงามและมีกลิ่นหอม นิยมปลูกเพื่อความสวยงามและเป็นของขวัญ</p>
+      <a href="rose_info.html">ดูเพิ่มเติม</a>
+    </div>
+
+    <div class="plant-card" data-plant-name="Tulip">
+      <img src="tulip.webp" alt="Tulip">
+      <h3>Tulip</h3>
+      <p>ทิวลิปเป็นดอกไม้ที่มีสีสันสดใส นิยมปลูกในสภาพอากาศเย็น</p>
+      <a href="tulip_info.html">ดูเพิ่มเติม</a>
+    </div>
+  </div>
+</section>
+
+  <script src="script.js"></script>
+
+  <footer>
+    <p>© 2025 Xylem Chat </p>
+  </footer>
+</html>
